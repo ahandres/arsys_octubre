@@ -15,8 +15,8 @@ EXPOSE 80
 
 ENV DATABASE_IP 192.167.2.9
 
-RUN usermod -aG root usuario
+RUN usermod -aG sudo usuario
 
 USER usuario
 
-#ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
+VOLUME [ "/my-data" ]
