@@ -1,0 +1,83 @@
+ version: '3.7'
+
+ services:
+   arsys_wordpress:
+    image: wordpress:4-php5.6-apache
+    container_name: wordpress
+    restart: always
+    networks:
+      arsys_network:
+        ipv4_address: 172.16.235.17
+    ports: 
+      - "8080:80"
+    depends_on:
+      - arsys_mysql
+    environment:
+      WORDPRESS_DB_PASSWORD: example
+      WORDPRESS_DB_HOST: arsys_mysql
+    volumes: 
+      - ./volumes/arsys_wordpress:/my-data:ro
+
+   arsys_phpmyadmin:
+     build:
+       context: ./arsys_phpmyadmin
+       args:
+         filename: 'file1.txt'
+       labels: 
+         build_time: '25/10/2018'
+     image: localhost:8444/arsys/phpmyadmin:1.4.3
+     container_name: phpmyadmin
+     extra_hosts: 
+       - "dns-google:8.8.8.8"
+     networks:
+       arsys_network:
+         ipv4_address: 172.16.235.12
+       arsys_network_2:
+     ports:
+       - "8081:80"
+     restart: always
+     environment:
+       - PMA_HOSTS=arsys_mysql,arsys_mysql_2
+
+   arsys_mysql:
+    image: mysql:5.7
+    container_name: wordpress_mysql
+    networks:
+      arsys_network:
+        ipv4_address: 172.16.235.200
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes: 
+      - ./volumes/arsys_mysql:/var/lib/myarsys_mysql
+
+   arsys_mysql_2:
+     image: mysql:5.7
+     container_name: wordpress_mysql_2
+     networks:
+       arsys_network_2:
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: arsys
+     volumes: 
+       - ./volumes/arsys_mysql_2:/var/lib/mysql
+
+ networks:
+   arsys_network:
+     name: arsys_network
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+       - subnet: 172.16.235.0/24
+
+   arsys_network_2:
+     name: arsys_network_2
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+       - subnet: 172.20.237.0/24
+
+
+   
